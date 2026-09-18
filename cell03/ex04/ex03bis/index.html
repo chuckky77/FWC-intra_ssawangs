@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ex03bis</title>
+    <style>
+        #ft_list div {
+            padding: 10px;
+            background: #eee;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+
+    <button id="new_btn">New</button>
+    <div id="ft_list"></div>
+
+    <script>
+        $(document).ready(function() {
+            loadToDos();
+
+            $('#new_btn').click(function() {
+                const text = prompt('Enter a new TO DO:');
+                if (text && text.trim() !== '') {
+                    addToDo(text.trim());
+                    saveToDos();
+                }
+            });
+
+            function addToDo(text) {
+                const $div = $('<div></div>').text(text);$div.click(function() {
+                    if (confirm('Do you really want to delete this TO DO?')) {
+                        $(this).remove();
+                        saveToDos();
+                    }
+                });
+
+                $('#ft_list').prepend($div);
+            }
+
+            function saveToDos() {
+                const todos = [];
+                $('#ft_list div').each(function() {
+                    todos.push($(this).text());
+                });
+                document.cookie = `ft_list=${encodeURIComponent(JSON.stringify(todos))};path=/;max-age=31536000`;
+            }
+
+            function loadToDos() {
+                const cookies = document.cookie.split('; ');
+                for (let cookie of cookies) {
+                    const [name, value] = cookie.split('=');
+                    if (name === 'ft_list' && value) {
+                        try {
+                            const todos = JSON.parse(decodeURIComponent(value));
+                            for (let i = todos.length - 1; i >= 0; i--) {
+                                addToDo(todos[i]);
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
